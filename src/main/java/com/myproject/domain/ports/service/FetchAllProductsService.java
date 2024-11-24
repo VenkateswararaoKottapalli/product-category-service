@@ -30,7 +30,7 @@ public class FetchAllProductsService implements IFetchAllProducts {
                 .retrieve()
                 .onStatus(httpStatusCode -> httpStatusCode.is4xxClientError() || httpStatusCode.is4xxClientError(),
                         clientResponse -> Mono.error(new RuntimeException("API call failed with status code: " + clientResponse.statusCode())))
-                .bodyToMono(new ParameterizedTypeReference<List<ProductResponse>>() {
+                .bodyToMono( new ParameterizedTypeReference<List<ProductResponse>>() {
                 });
 
         List<ProductResponse> productResponseList = null;

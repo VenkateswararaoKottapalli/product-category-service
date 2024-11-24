@@ -1,5 +1,6 @@
 package com.myproject.interfaces.rest.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -7,6 +8,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 public class AddProductResponse {
     private String title;
     private Double price;

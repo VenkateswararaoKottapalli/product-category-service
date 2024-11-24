@@ -3,10 +3,12 @@ package com.myproject.interfaces.rest.controller;
 import com.myproject.application.config.MessageResourceConfig;
 import com.myproject.common.utility.ResponseUtility;
 import com.myproject.domain.ports.inbound.*;
+import com.myproject.exception.ProductCategoryException;
 import com.myproject.interfaces.rest.request.AddProductRequest;
 import com.myproject.interfaces.rest.request.ProductResponse;
 import com.myproject.interfaces.rest.response.AddProductResponse;
 import com.myproject.interfaces.rest.response.ResponseTemplate;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.myproject.application.constant.ExceptionCodes.MANDATORY_PARAMETER_MISSING_CODE;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -61,9 +65,10 @@ public class ProductController {
 
     @PostMapping()
     public ResponseEntity<ResponseTemplate<AddProductResponse>> addNewProduct(
-            @RequestBody AddProductRequest addProductRequest
+            @RequestBody @Valid AddProductRequest addProductRequest
     ) {
         log.info("Request accepted to add new product with details: {}.", addProductRequest);
+        validateProductRequest(addProductRequest);
         AddProductResponse addProductResponse = createProduct.addNewProduct(addProductRequest);
         String message = !ObjectUtils.isEmpty(addProductResponse) ?
                 messageResourceConfig.getMessage("product.created") :
@@ -122,5 +127,18 @@ public class ProductController {
                 ResponseUtility.generateResponse(productResponse, HttpStatus.OK.value(), message),
                 HttpStatus.OK
         );
+    }
+
+    public void validateProductRequest(AddProductRequest addProductRequest) {
+        log.info("Validating product request: {}", addProductRequest);
+        if (ObjectUtils.isEmpty(addProductRequest.getTitle()) || ObjectUtils.isEmpty(addProductRequest.getPrice())
+                || ObjectUtils.isEmpty(addProductRequest.getCategory()) || ObjectUtils.isEmpty(addProductRequest.getImage())) {
+            log.error("Product title price and category is expected in the product request.");
+            throw new ProductCategoryException(
+                    MANDATORY_PARAMETER_MISSING_CODE,
+                    messageResourceConfig.getMessage("mandatory.parameter.missing")
+            );
+        }
+
     }
 }
